@@ -128,45 +128,46 @@ function importFromJsonFile(event) {
 }
 
 // Synchroniser les citations vers le serveur (POST)
-function syncQuotes() {
-  fetch(SERVER_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ quotes })
-  })
-  .then(res => res.json())
-  .then(data => console.log("Synced to server:", data))
-  .catch(err => console.error("Sync error:", err));
+async function syncQuotes() {
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ quotes })
+    });
+    const data = await response.json();
+    console.log("Synced to server:", data);
+  } catch (err) {
+    console.error("Sync error:", err);
+  }
 }
 
 // Récupérer les citations du serveur (GET) et gérer conflits
-function fetchQuotesFromServer() {
-  fetch(SERVER_URL)
-    .then(res => res.json())
-    .then(data => {
-      // Exemple: on mappe seulement 5 items pour éviter surcharge
-      const serverQuotes = Array.isArray(data)
-        ? data.slice(0,5).map(post => ({ text: post.title, category: "Server" }))
-        : [];
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const data = await response.json();
+    const serverQuotes = Array.isArray(data)
+      ? data.slice(0,5).map(post => ({ text: post.title, category: "Server" }))
+      : [];
 
-      let updated = false;
-
-      serverQuotes.forEach(sq => {
-        // Si pas déjà présent, on l'ajoute
-        if (!quotes.find(q => q.text === sq.text)) {
-          quotes.push(sq);
-          updated = true;
-        }
-      });
-
-      if (updated) {
-        alert("Quotes updated from server.");
-        saveQuotes();
-        populateCategories();
-        filterQuotes();
+    let updated = false;
+    serverQuotes.forEach(sq => {
+      if (!quotes.find(q => q.text === sq.text)) {
+        quotes.push(sq);
+        updated = true;
       }
-    })
-    .catch(err => console.error("Fetch error:", err));
+    });
+
+    if (updated) {
+      alert("Quotes updated from server.");
+      saveQuotes();
+      populateCategories();
+      filterQuotes();
+    }
+  } catch (err) {
+    console.error("Fetch error:", err);
+  }
 }
 
 // Initialisation au chargement
