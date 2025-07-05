@@ -12,6 +12,31 @@ function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
+// Afficher notification temporaire
+function showNotification(message) {
+  let notif = document.getElementById("notification");
+  if (!notif) {
+    notif = document.createElement("div");
+    notif.id = "notification";
+    notif.style.position = "fixed";
+    notif.style.top = "10px";
+    notif.style.right = "10px";
+    notif.style.backgroundColor = "#4caf50";
+    notif.style.color = "white";
+    notif.style.padding = "10px 20px";
+    notif.style.borderRadius = "5px";
+    notif.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+    notif.style.zIndex = "1000";
+    notif.style.display = "none";
+    document.body.appendChild(notif);
+  }
+  notif.textContent = message;
+  notif.style.display = "block";
+  setTimeout(() => {
+    notif.style.display = "none";
+  }, 3000);
+}
+
 // Remplir le menu des catégories
 function populateCategories() {
   const select = document.getElementById("categoryFilter");
@@ -137,6 +162,7 @@ async function syncQuotes() {
     });
     const data = await response.json();
     console.log("Synced to server:", data);
+    showNotification("Quotes synced with server!");
   } catch (err) {
     console.error("Sync error:", err);
   }
@@ -160,7 +186,7 @@ async function fetchQuotesFromServer() {
     });
 
     if (updated) {
-      alert("Quotes updated from server.");
+      showNotification("Quotes updated from server.");
       saveQuotes();
       populateCategories();
       filterQuotes();
