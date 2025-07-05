@@ -1,18 +1,11 @@
 let quotes = [];
+let lastSyncTimestamp = null;
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
 
 // Load from localStorage or set defaults
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
-  if (storedQuotes) {
-    quotes = JSON.parse(storedQuotes);
-  } else {
-    quotes = [
-      { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" },
-      { text: "In the middle of difficulty lies opportunity.", category: "Inspiration" },
-      { text: "Life is what happens when you're busy making other plans.", category: "Life" },
-    ];
-    saveQuotes();
-  }
+  quotes = storedQuotes ? JSON.parse(storedQuotes) : [];
 }
 
 function saveQuotes() {
@@ -66,6 +59,7 @@ function addQuote() {
     alert("Quote added successfully!");
     textInput.value = "";
     categoryInput.value = "";
+    syncToServer();
   } else {
     alert("Please enter both quote and category.");
   }
@@ -131,9 +125,48 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
+function syncToServer() {
+  fetch(SERVER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quotes })
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log("Data synced to server:", data);
+  })
+  .catch(err => console.error("Sync failed:", err));
+}
+
+function fetchFromServer() {
+  fetch(SERVER_URL)
+    .then(response => response.json())
+    .then(data => {
+      const serverQuotes = Array.isArray(data)
+        ? data.slice(0, 5).map(post => ({ text: post.title, category: "Server" }))
+        : [];
+      let hasConflict = false;
+      serverQuotes.forEach(sq => {
+        if (!quotes.find(q => q.text === sq.text)) {
+          quotes.push(sq);
+          hasConflict = true;
+        }
+      });
+      if (hasConflict) {
+        alert("Quotes updated from server.");
+        saveQuotes();
+        populateCategories();
+        filterQuotes();
+      }
+    })
+    .catch(err => console.error("Fetch failed:", err));
+}
+
 window.onload = () => {
   loadQuotes();
   createAddQuoteForm();
   populateCategories();
+  filterQuotes();
   document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+  setInterval(fetchFromServer, 30000); // sync every 30 seconds
 };
