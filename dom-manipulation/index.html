@@ -17,7 +17,7 @@
       border-radius: 5px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-    input, button {
+    input, button, select {
       margin: 5px;
       padding: 10px;
     }
@@ -25,6 +25,11 @@
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
+
+  <label for="categoryFilter">Filter by Category:</label>
+  <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+  </select>
 
   <div id="quoteDisplay">Click the button to see a quote!</div>
   <button id="newQuote">Show New Quote</button>
@@ -38,4 +43,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
