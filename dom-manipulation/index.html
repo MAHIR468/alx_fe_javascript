@@ -27,16 +27,15 @@
   <h1>Dynamic Quote Generator</h1>
 
   <div id="quoteDisplay">Click the button to see a quote!</div>
-
   <button id="newQuote">Show New Quote</button>
 
-  <div>
-    <h3>Add a New Quote</h3>
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button onclick="addQuote()">Add Quote</button>
-  </div>
+  <div id="formContainer"></div>
+
+  <h3>Import / Export Quotes</h3>
+  <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+  <button onclick="exportToJsonFile()">Export Quotes to JSON</button>
 
   <script src="script.js"></script>
 </body>
 </html>
+
